@@ -93,12 +93,19 @@ def process_prediction_sync(
         metadata,
     )
 
-    from alerts.notifier_telegram import send_telegram_notification
+    # send only for real attacks
+    if pred.label.upper() != "BENIGN":
 
-    try:
-        send_telegram_notification(ev.dict())
-    except Exception as e:
-        print("telegram direct error:", e)
+        event_dict = ev.dict()
+
+        try:
+            if notify_enqueue:
+                _notifier_worker.submit(event_dict)
+            else:
+                _notifier_worker._send_with_retries(event_dict)
+
+        except Exception:
+            logger.exception("Telegram send failed")
 
     try:
         _event_logger.append(ev)

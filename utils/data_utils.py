@@ -1,11 +1,4 @@
 # utils/data_utils.py
-"""
-Data loading and validation helpers.
-
- - load_combined(processed_dir="data/processed")
- - load_or_sample_df(...) safe memory-aware loader
- - validate_schema_matches_df(schema, df)
-"""
 from pathlib import Path
 import json
 import pandas as pd
@@ -22,13 +15,6 @@ def available_memory_gb() -> float:
 
 
 def load_combined(processed_dir: Path or str = "data/processed", prefer_sample_threshold_gb: float = 6.0) -> pd.DataFrame:
-    """
-    Load combined_cleaned.parquet from processed_dir.
-    If available memory < prefer_sample_threshold_gb, attempt to load a representative sample:
-      - if 'sample_cleaned.csv.gz' exists, load that (fast and small)
-      - else read parquet and sample in-memory (may OOM)
-    Returns a dataframe (may be a sample).
-    """
     processed_dir = Path(processed_dir)
     combined = processed_dir / "combined_cleaned.parquet"
     sample_csv = processed_dir / "sample_cleaned.csv.gz"
@@ -51,10 +37,6 @@ def load_combined(processed_dir: Path or str = "data/processed", prefer_sample_t
 
 
 def validate_schema_matches_df(schema: dict, df: pd.DataFrame) -> Tuple[bool, str]:
-    """
-    Ensure schema.feature_columns matches DataFrame columns exactly (order sensitive).
-    Returns (ok, message).
-    """
     schema_cols = schema.get("feature_columns") or schema.get("feature_columns", None)
     if schema_cols is None:
         return False, "schema.feature_columns not present"

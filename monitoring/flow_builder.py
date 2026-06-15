@@ -1,10 +1,3 @@
-"""
-FlowTable and FlowRecord implement robust 5-tuple flow bookkeeping.
-Flows are keyed by (src, dst, sport, dport, proto) with direction normalization
-(i.e., flows are unidirectional keys based on first packet direction).
-We store per-packet micro-stats needed for feature extraction.
-"""
-
 import threading
 import time
 import logging
@@ -17,11 +10,6 @@ logger = logging.getLogger("monitor.flow_builder")
 
 
 class FlowRecord:
-    """
-    Stores data for one flow (unidirectional from initiator to responder as seen).
-    We'll keep list of packets as dicts, but cap memory with FLOW_MAX_PACKETS.
-    """
-
     def __init__(self, key: Tuple[str, str, int, int, str], first_packet: Dict[str, Any]):
         self.key = key
         self.packets: List[Dict[str, Any]] = []
@@ -71,11 +59,6 @@ class FlowRecord:
 
 
 class FlowTable:
-    """
-    Thread-safe flow table with eviction and cleanup.
-    Uses OrderedDict to limit memory by removing oldest entries when MAX_MEMORY_FLOWS exceeded.
-    Provides a queue of closed flows for processing by external consumers.
-    """
 
     def __init__(self):
         self.flows: Dict[Tuple[str, str, int, int, str], FlowRecord] = OrderedDict()
@@ -117,7 +100,6 @@ class FlowTable:
             return self.flows.get(key)
 
     def close_flow(self, key):
-        """Remove flow from table, mark as closed, and push to closed_queue."""
         with self.lock:
             rec = self.flows.pop(key, None)
             if rec:

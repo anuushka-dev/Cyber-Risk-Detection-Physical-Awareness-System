@@ -1,22 +1,10 @@
 # monitoring/packet_capture.py
-"""
-Packet capture wrapper: uses scapy sniff if available and permitted.
-If scapy isn't available or capture fails (permission issues), raise an informative error
-so caller can fallback to SIMULATE mode.
-"""
-
 import logging
 from typing import Callable, Optional
 
 logger = logging.getLogger("monitor.packet_capture")
 
 def start_packet_capture(callback: Callable[..., None], interface: Optional[str] = None, promisc: bool = True):
-    """
-    Start packet capture and call callback for each parsed packet.
-    Callback signature:
-        callback(src_ip, dst_ip, src_port, dst_port, protocol, length, flags, timestamp, tcp_window, payload_len)
-    This wrapper catches scapy import/permission errors and raises them so the caller can handle gracefully.
-    """
     try:
         # import local to allow import even if scapy not installed
         from scapy.all import sniff

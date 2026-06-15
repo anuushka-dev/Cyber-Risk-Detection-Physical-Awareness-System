@@ -38,11 +38,6 @@ SEED = 42
 # Small threaded flow-cleaner (optional demo utility)
 # -------------------------
 class ThreadedFlowCleaner:
-    """
-    Lightweight thread that periodically prunes an external flows dict by 'last_seen' timestamp.
-    This is a demonstration helper ONLY. It does not participate in training data -- it's safe to enable
-    with --enable_flow_cleaner to exercise your flow assembler integration or local demos.
-    """
     def __init__(self, flows: dict, idle_seconds: int = 5, interval: float = 1.0):
         self.flows = flows
         self.idle_seconds = idle_seconds
@@ -79,13 +74,6 @@ class ThreadedFlowCleaner:
 # Wrapper to save fitted preprocessor + booster + helper methods
 # -------------------------
 class XGBoostPipelineWrapper:
-    """
-    Small wrapper object to save:
-      - fitted preprocessor (sklearn transformer)
-      - xgboost Booster (trained via xgb.train)
-      - label encoder
-    Provides predict/predict_proba that accept pandas DataFrame.
-    """
     def __init__(self, preprocessor, booster: xgb.Booster, label_encoder: LabelEncoder, feature_list):
         self.preprocessor = preprocessor
         self.booster = booster
@@ -161,9 +149,6 @@ def build_param_grid():
     return param_grid
 
 def compute_per_class_thresholds(booster, X_val_trans, y_val_enc, le, feature_list, preprocessor):
-    """
-    Equivalent threshold search but for booster + preprocessor.
-    """
     try:
         dval = xgb.DMatrix(X_val_trans)
         probs = booster.predict(dval)

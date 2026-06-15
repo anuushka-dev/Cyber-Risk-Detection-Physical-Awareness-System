@@ -1,5 +1,4 @@
-# alerts/event_logger.py  (OVERWRITE this file with the content below)
-
+# alerts/event_logger.py 
 import json
 import os
 import sqlite3
@@ -33,14 +32,6 @@ CREATE TABLE IF NOT EXISTS deduper_state (
 
 
 class EventLogger:
-    """
-    Lightweight JSONL + SQLite event logger used by the alerts subsystem.
-
-    Constructor is intentionally forgiving for test compatibility:
-      - jsonl_path: path to JSONL file (preferred)
-      - db_path: path to sqlite DB file for persisted notifications
-      - log_file: legacy alias for jsonl_path (tests use this)
-    """
 
     def __init__(self, jsonl_path: Optional[str] = None, db_path: Optional[str] = None, *, log_file: Optional[str] = None):
         # Backwards compatibility: accept log_file as alias
@@ -116,10 +107,6 @@ class EventLogger:
                 pass
 
     def persist_failed_notification(self, payload: Dict[str, Any]) -> None:
-        """
-        Persist a failed outgoing notification into sqlite for later retry.
-        Payload is stored as JSON text.
-        """
         conn = sqlite3.connect(str(self.db_path))
         try:
             cur = conn.cursor()
@@ -132,10 +119,6 @@ class EventLogger:
             conn.close()
 
     def fetch_failed_notifications(self, limit: int = 100) -> List[Tuple[int, float, str, int]]:
-        """
-        Fetch up to `limit` failed notifications as rows:
-        (id, created_at, payload_text, attempts)
-        """
         conn = sqlite3.connect(str(self.db_path))
         try:
             cur = conn.cursor()
@@ -146,7 +129,6 @@ class EventLogger:
             conn.close()
 
     def remove_failed_notification(self, notif_id: int) -> None:
-        """Remove a persisted notification after successful delivery."""
         conn = sqlite3.connect(str(self.db_path))
         try:
             cur = conn.cursor()
@@ -156,7 +138,6 @@ class EventLogger:
             conn.close()
 
     def increment_attempts(self, notif_id: int) -> None:
-        """Increment attempts counter for a persisted notification."""
         conn = sqlite3.connect(str(self.db_path))
         try:
             cur = conn.cursor()

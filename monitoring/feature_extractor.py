@@ -1,4 +1,4 @@
-# monitoring/feature_extractor.py  (complete replacement of previous class and helpers)
+# monitoring/feature_extractor.py  
 
 from typing import List, Dict, Any, Optional
 import numpy as np
@@ -107,12 +107,6 @@ class FeatureExtractor:
         self.active_gap = active_gap_threshold
 
     def extract(self, packets: List[Dict[str, Any]], initiator: Optional[tuple] = None) -> List[float]:
-        """
-        packets: list of packet dicts (same as before)
-        initiator: optional tuple (src_ip, src_port) to explicitly define forward direction
-                   if provided, it will be used instead of first packet inference.
-        returns: list of 45 floats in EXACT order of FEATURE_ORDER
-        """
         # quick zero-vector fallback
         if not packets:
             return [0.0] * 45

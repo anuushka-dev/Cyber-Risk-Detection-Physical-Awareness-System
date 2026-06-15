@@ -21,10 +21,6 @@ except Exception:
     logger.debug("train.train_model.XGBoostPipelineWrapper not importable (may not be needed)")
 
 def load_artifacts(model_dir: Path = MODEL_DIR, feature_dir: Path = FEATURE_DIR) -> Tuple[Any, List[str], Any]:
-    """
-    Load model, feature list and label encoder. Raise on any integrity problem.
-    Returns (model, feature_list, label_encoder)
-    """
     model_path = model_dir / "intrusion_model.joblib"
     le_path = model_dir / "label_encoder.joblib"
     feature_path = feature_dir / "feature_list.json"

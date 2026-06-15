@@ -1,12 +1,4 @@
 # utils/feature_utils.py
-"""
-Feature selection helpers:
- - remove_constant_features
- - remove_highly_correlated
- - safe_strip_columns
- - select_numeric_categorical
-All functions are pure and documented.
-"""
 
 from typing import List, Tuple, Dict
 import re

@@ -137,10 +137,6 @@ def _detect_people(frame):
 
 
 def _dedupe_person_boxes(face_boxes, body_boxes):
-    """
-    Prefer face boxes.
-    Add body boxes only if they do not strongly overlap with a face box.
-    """
     merged = list(face_boxes)
 
     for b in body_boxes:
@@ -161,10 +157,6 @@ def _detect_label(box):
 
 
 def _match_tracks(tracks, detections):
-    """
-    Greedy IoU matching.
-    A track becomes 'stable' only after it survives STABLE_HITS matches.
-    """
     used_dets = set()
 
     for t in tracks:

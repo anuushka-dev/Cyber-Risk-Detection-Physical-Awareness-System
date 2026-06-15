@@ -1,5 +1,4 @@
 # api/logging_config.py
-# api/logging_config.py
 
 import logging
 import sys

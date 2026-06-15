@@ -13,34 +13,19 @@ def send_telegram_notification(event):
         print("Telegram not configured")
         return False
 
-
     label = (
         event.get("attack_type")
         or event.get("label")
         or "ATTACK"
     )
 
-
     severity = (
         event.get("severity")
         or "unknown"
     )
 
-
-    src_ip = (
-        event.get("src_ip")
-        or event.get("flow_meta", {}).get("src_ip")
-        or event.get("metadata", {}).get("src_ip")
-        or "unknown"
-    )
-
-
-    dst_ip = (
-        event.get("dst_ip")
-        or event.get("flow_meta", {}).get("dst_ip")
-        or event.get("metadata", {}).get("dst_ip")
-        or "unknown"
-    )
+    src_ip = event.get("src_ip") or "unknown"
+    dst_ip = event.get("dst_ip") or "unknown"
 
 
     confidence = float(
@@ -48,7 +33,6 @@ def send_telegram_notification(event):
         or event.get("score")
         or 0.0
     )
-
 
     meta = event.get("metadata", {}) or {}
 

@@ -18,11 +18,6 @@ except Exception:
 
 
 class NotificationWorker:
-    """
-    Bounded in-memory queue with ThreadPoolExecutor workers.
-    Persists failed sends to DB via EventLogger.
-    Also supports Telegram notifications with cooldown.
-    """
 
     def __init__(
         self,
@@ -40,9 +35,6 @@ class NotificationWorker:
         self._logger = EventLogger()
 
     def submit(self, event: Dict[str, Any]) -> bool:
-        """
-        Enqueue event for sending. Returns True if enqueued, False if queue full.
-        """
         try:
             self.q.put_nowait(event)
             return True
@@ -70,10 +62,6 @@ class NotificationWorker:
             self.executor.shutdown(wait=True)
 
     def _send_with_retries(self, event: Dict[str, Any]) -> bool:
-        """
-        Try all configured channels with retry & backoff.
-        On persistent failure, persist via EventLogger.
-        """
         ok_overall = True
 
         # Console always best-effort
@@ -177,23 +165,12 @@ class NotificationWorker:
         return False
 
     def _try_telegram(self, event: Dict[str, Any]) -> bool:
-        """
-        Telegram notifier:
-        - sends only medium/high/critical
-        - includes IPs
-        - applies cooldown
-        - skips silently when not configured
-        """
         try:
             return send_telegram_notification(event)
         except Exception:
             return False
 
     def format_for_webhook(self, event: Dict[str, Any]) -> Dict[str, Any]:
-        """
-        Default webhook payload. You can extend to per-channel formatters.
-        For Slack-like webhooks, a top-level `text` is provided plus `event`.
-        """
         text = (
             f"ALERT: {event.get('attack_type') or event.get('label')} "
             f"from {event.get('src_ip')} to {event.get('dst_ip')} "
