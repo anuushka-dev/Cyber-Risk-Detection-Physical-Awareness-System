@@ -1,170 +1,354 @@
-AI Intrusion Detection System with Human Context Awareness
+# Cyber Risk Detection & Physical Awareness System
 
-Setup Instructions
-1. Clone or unzip project
+An end-to-end security monitoring system that combines **network intrusion detection** with **physical surveillance context**.
 
-Navigate to project folder:
+The system uses an ML-based intrusion detection pipeline alongside webcam-based human-context detection, connects both signals through a FastAPI service layer, and supports event logging and Telegram-based alerting.
 
-cd Cyber_Risk_Detection_System
+## Architecture
 
-2. Create virtual environment
+```text
+                  CICIDS2017
+                       │
+                       ▼
+              Feature Processing
+                       │
+                       ▼
+                XGBoost IDS
+                       │
+                       │
+                       ▼
+              ┌─────────────────┐
+              │  Context Fusion │
+              └────────┬────────┘
+                       ▲
+                       │
+                Webcam / OpenCV
+                       │
+                       ▼
+             Human / Physical Context
+                       │
+                       │
+                       ▼
+                    FastAPI
+                  ┌────┴────┐
+                  ▼         ▼
+               Dashboard   Alerts
+                             │
+                          Telegram
+```
 
-Windows:
+## What the System Does
 
-python -m venv venv
-venv\Scripts\activate
+### Network Intrusion Detection
 
-Mac/Linux:
+The network-security pipeline uses the **CICIDS2017** dataset and an **XGBoost** classifier to identify malicious network activity from traffic features.
 
-python3 -m venv venv
-source venv/bin/activate
+```text
+Network Traffic
+      ↓
+Feature Processing
+      ↓
+Model Inference
+      ↓
+Attack Classification
+      ↓
+Confidence / Event
+```
 
-3. Install dependencies
+### Physical Awareness
+
+The physical-awareness module processes webcam input using **OpenCV** and provides contextual information such as detected people and motion-related signals.
+
+```text
+Webcam
+  ↓
+Frame Processing
+  ↓
+Human Detection
+  ↓
+Physical Context
+```
+
+### Context Fusion
+
+The system combines cyber and physical signals rather than treating network detection as an isolated classifier.
+
+```text
+Cyber Detection
+      +
+Physical Context
+      ↓
+Context Fusion
+      ↓
+Security Event
+      ↓
+Alert / Logging
+```
+
+## Backend API
+
+The FastAPI application provides the service boundary for model inference and system monitoring.
+
+| Endpoint         | Purpose                                       |
+| ---------------- | --------------------------------------------- |
+| `/`              | Service status                                |
+| `/health`        | API and model health                          |
+| `/model-info`    | Loaded model metadata                         |
+| `/predict`       | Single prediction                             |
+| `/predict/batch` | Batch prediction                              |
+| `/events`        | Recent prediction events                      |
+| `/recent-events` | Recent event feed                             |
+| `/logs`          | Recent attack logs                            |
+| `/devices`       | Device context                                |
+| `/packets`       | Recent packet records                         |
+| `/human-context` | Current physical context                      |
+| `/camera-frame`  | Latest camera frame                           |
+| `/demo/attack`   | Generate a synthetic attack event for testing |
+
+The API also uses request IDs and structured JSONL event logging to make runtime behavior easier to inspect.
+
+## Technology Stack
+
+### Backend
+
+Python · FastAPI · Uvicorn
+
+### Machine Learning
+
+XGBoost · scikit-learn · NumPy · Pandas · SciPy · Joblib
+
+### Computer Vision
+
+OpenCV
+
+### Monitoring & Application
+
+JSON logging · Plotly · Requests · psutil
+
+## Project Structure
+
+```text
+api/
+├── app.py
+├── logging_config.py
+├── model_loader.py
+└── ...
+
+alerts/
+├── alert_engine.py
+├── event_logger.py
+├── notifier.py
+└── notifier_telegram.py
+
+monitoring/
+├── config.py
+├── feature_extractor.py
+├── flow_builder.py
+├── human_context.py
+├── packet_capture.py
+├── realtime_monitor.py
+└── virtual_attack.py
+
+train/
+└── train_model.py
+
+utils/
+├── data_utils.py
+└── feature_utils.py
+
+verification/
+├── verify_live_api.py
+├── verify_logs.py
+├── verify_telegram.py
+└── run.py
+```
+
+## Requirements
+
+* Python 3.9–3.11
+* Webcam for the physical-awareness module
+* Python dependencies listed in `requirements.txt`
+
+## Installation
+
+Create a virtual environment:
+
+```bash
+python -m venv .venv
+```
+
+Activate it.
+
+### Windows
+
+```powershell
+.venv\Scripts\activate
+```
+
+### macOS / Linux
+
+```bash
+source .venv/bin/activate
+```
+
+Install dependencies:
+
+```bash
 pip install -r requirements.txt
+```
 
-4. Configure Telegram Alerts (optional)
+## Configuration
 
-Create file:
+Create a local `.env` file in the project root.
 
-.env
+For Telegram alerts:
 
-Example:
-
-TELEGRAM_BOT_TOKEN=your_bot_token_here
-TELEGRAM_CHAT_ID=your_chat_id_here
+```env
+TELEGRAM_BOT_TOKEN=your_bot_token
+TELEGRAM_CHAT_ID=your_chat_id
 TELEGRAM_COOLDOWN_SECONDS=120
+```
 
-If Telegram not needed, leave file empty.
+**Never commit `.env` files or Telegram credentials to Git.**
 
-5. Run Backend API
+## Run the API
 
+```bash
 python -m uvicorn api.app:app --reload
+```
 
+## Run the Monitoring Pipeline
 
-6. Run Frontend Dashboard
+```bash
+python -m monitoring.realtime_monitor
+```
 
+The physical-awareness module requires a connected webcam.
 
-Navigate to frontend folder:
+## Run the Frontend
 
+From the frontend directory:
+
+```bash
 cd frontend
 npm install
 npm run dev
-
-7. Run RealTime Monitoring
-
-python -m monitoring.realtime_monitor
-
-Requirements
-
-Python 3.9 – 3.11 recommended.
-
-Webcam required for human detection module.
-
-
-# Telegram Alerts Setup 
-
-### Step 1 — Create Bot
-
-1. Open Telegram
-2. Search **BotFather**
-3. Send:
-
-```
-/start
 ```
 
-4. Send:
+## Telegram Alerts
 
-```
-/newbot
-```
+Telegram notifications are optional.
 
-5. Enter bot name (example):
+The notifier reads credentials from environment variables:
 
-```
-AI IDS Alerts
-```
-
-6. Enter username (must end with `bot`):
-
-```
-ainids_alerts_bot
+```text
+TELEGRAM_BOT_TOKEN
+TELEGRAM_CHAT_ID
 ```
 
-7. Copy the **BOT TOKEN** provided.
+When an alert is generated, the notification can contain information such as:
 
----
+* detected attack type
+* severity
+* source and destination information
+* model confidence
+* physical context
 
-### Step 2 — Get Chat ID
+Keep all bot credentials outside the repository.
 
-1. Open your bot in Telegram
-2. Click **Start**
-3. Send message:
+## Verification
 
-```
-hello
-```
+The repository includes lightweight verification utilities for the running system.
 
-4. Open browser:
-
-```
-https://api.telegram.org/bot<YOUR_TOKEN>/getUpdates
-```
-
-Example:
-
-```
-https://api.telegram.org/bot123456:ABC/getUpdates
+```bash
+python verification/verify_live_api.py
+python verification/verify_logs.py
+python verification/verify_telegram.py
 ```
 
-5. Copy the number:
+These scripts are intended for integration and runtime checks. They are not a replacement for a comprehensive automated test suite.
 
-```
-"chat":{"id":5279301197}
-```
+## Engineering Focus
 
-That number is your **CHAT ID**.
+This project goes beyond a standalone ML notebook.
 
----
+It demonstrates:
 
-### Step 3 — Create .env file
+* ML inference behind an API
+* batch inference
+* model loading and artifact management
+* network-flow processing
+* computer-vision integration
+* context fusion
+* structured event logging
+* request tracing
+* health and model-info endpoints
+* alert delivery
+* runtime verification
 
-In project root create file:
+The main engineering idea is to treat the ML model as one component of a larger system rather than the entire application.
 
-```
-.env
-```
+## Evaluation
 
-Add:
+Model performance should be reported from reproducible experiments rather than generic accuracy claims.
 
-```
-TELEGRAM_BOT_TOKEN=your_token_here
-TELEGRAM_CHAT_ID=your_chat_id_here
-TELEGRAM_COOLDOWN_SECONDS=120
-```
+A proper evaluation report should include:
 
-Example:
-
-```
-TELEGRAM_BOT_TOKEN=123456:ABCxyz
-TELEGRAM_CHAT_ID=5279301197
-TELEGRAM_COOLDOWN_SECONDS=120
-```
-
----
-
-### Step 4 — Run system
-
-```
-python -m uvicorn api.app:app --reload
+```text
+Dataset split
+Preprocessing
+Class distribution
+Accuracy
+Precision
+Recall
+F1-score
+Confusion matrix
+Inference environment
 ```
 
-Telegram will send alerts automatically when:
+Metrics should only be added to this README when the corresponding experiment and evaluation procedure are available in the repository.
 
-• attack detected
-• severity ≥ MEDIUM
-• more than 2 people detected
+## Security & Production Boundaries
 
----
+This project is a **prototype/research system**, not a production security platform.
 
-Done 
+Further hardening would include:
+
+* authenticated API access
+* restrictive CORS configuration
+* stronger automated unit and integration testing
+* model versioning and artifact provenance
+* reproducible ML experiments
+* false-positive and false-negative analysis
+* production-grade secret management
+* secure telemetry retention
+* audit logging
+* deployment and incident-response documentation
+
+### Credential History
+
+A historical repository commit contained Telegram credential material.
+
+Any affected Telegram bot credential should be **rotated immediately** and the obsolete secret should be removed from repository history.
+
+## Current Status
+
+### Implemented
+
+* XGBoost-based intrusion detection
+* FastAPI inference API
+* Batch inference
+* Physical-awareness integration
+* Context-aware event generation
+* Structured runtime logging
+* Telegram alerting path
+* Verification utilities
+
+### Next Engineering Work
+
+* Reproducible model evaluation artifacts
+* Broader automated test coverage
+* Secure deployment configuration
+* Improved observability
+* Historical credential cleanup
+* Production security hardening
