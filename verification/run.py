@@ -1,7 +1,7 @@
 import requests
 
-TOKEN= "***REMOVED***"
-CHAT_ID=  "5279301197"
+TOKEN= "YOUR_BOT_TOKEN_HERE"
+CHAT_ID=  "YOUR_CHAT_ID_HERE"
 
 msg="TEST ALERT from IDS"
 
